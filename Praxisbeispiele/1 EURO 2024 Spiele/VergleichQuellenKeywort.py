@@ -2,10 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Pfad zur CSV-Datei
 csv_file_path = 'Thesen/EMSpiele/Kommentare.csv'
 
-# CSV-Datei in ein DataFrame laden
 df = pd.read_csv(csv_file_path)
 
 df['KommentarDEU_lower'] = df['KommentarDEU'].str.lower()
@@ -20,27 +18,23 @@ def filter_by_keywords(df, keywords):
 def durchschnittSentimentProQuellenDurchschnittSentimentAlleQuellen(df, keywords):
     filtered_df = filter_by_keywords(df, keywords)
 
-    # Gruppierung nach QuellenId und Berechnung der Durchschnittswerte nur für die Sentiment-Spalten
     source_avg = filtered_df.groupby('QuellenId').agg({
         'sentimentDEU': 'mean',
         'sentimentENG': 'mean',
-        'KommentarDEU_lower': 'count',  # Anzahl der deutschen Kommentare pro Quelle
-        'KommentarENG_lower': 'count'   # Anzahl der englischen Kommentare pro Quelle
+        'KommentarDEU_lower': 'count', 
+        'KommentarENG_lower': 'count'  
     })
 
-    # Gesamtanzahl der Kommentare pro Quelle berechnen
     source_avg['AnzahlKommentareDEU'] = source_avg['KommentarDEU_lower']
     source_avg['AnzahlKommentareENG'] = source_avg['KommentarENG_lower']
     source_avg.drop(['KommentarDEU_lower', 'KommentarENG_lower'], axis=1, inplace=True)
 
-    # Berechnung des Durchschnitts der Sentiments pro Quelle
     overall_avg_deu = source_avg['sentimentDEU'].mean()
     overall_avg_eng = source_avg['sentimentENG'].mean()
 
     source_avg['diffDEU'] = source_avg['sentimentDEU'] - overall_avg_deu
     source_avg['diffENG'] = source_avg['sentimentENG'] - overall_avg_eng
 
-    # Plot erstellen
     bar_width = 0.35
     index = np.arange(len(source_avg))
 
@@ -55,12 +49,6 @@ def durchschnittSentimentProQuellenDurchschnittSentimentAlleQuellen(df, keywords
     plt.xticks(index, source_avg.index)
     plt.legend()
 
-    # Anzahl der Kommentare pro Quelle über den Balken anzeigen (nur einmal pro Quelle)
-    #for i, (deu_count, eng_count) in enumerate(zip(source_avg['AnzahlKommentareDEU'], source_avg['AnzahlKommentareENG'])):
-    #    plt.text(i, max(source_avg['diffDEU'].max(), source_avg['diffENG'].max()) + 0.05, str(deu_count),
-    #             color='black', fontweight='bold', ha='center', va='top')
-
-    # Schlüsselwörter im Diagramm oben links anzeigen
     plt.text(-0.5, max(source_avg['diffDEU'].max(), source_avg['diffENG'].max()), f"Schlüsselwörter:\n{', '.join(keywords)}",
              verticalalignment='top', horizontalalignment='left', bbox=dict(facecolor='white', alpha=0.5))
 
@@ -69,27 +57,23 @@ def durchschnittSentimentProQuellenDurchschnittSentimentAlleQuellen(df, keywords
 def durchschnittSentimentProQuellenDurchschnittSentimentAlleKommentare(df, keywords):
     filtered_df = filter_by_keywords(df, keywords)
 
-    # Gruppierung nach QuellenId und Berechnung der Durchschnittswerte nur für die Sentiment-Spalten
     source_avg = filtered_df.groupby('QuellenId').agg({
         'sentimentDEU': 'mean',
         'sentimentENG': 'mean',
-        'KommentarDEU_lower': 'count',  # Anzahl der deutschen Kommentare pro Quelle
-        'KommentarENG_lower': 'count'   # Anzahl der englischen Kommentare pro Quelle
+        'KommentarDEU_lower': 'count', 
+        'KommentarENG_lower': 'count'  
     })
 
-    # Gesamtanzahl der Kommentare pro Quelle berechnen
     source_avg['AnzahlKommentareDEU'] = source_avg['KommentarDEU_lower']
     source_avg['AnzahlKommentareENG'] = source_avg['KommentarENG_lower']
     source_avg.drop(['KommentarDEU_lower', 'KommentarENG_lower'], axis=1, inplace=True)
 
-    # Berechnung des Durchschnitts der Sentiments pro Quelle
     overall_avg_deu = filtered_df['sentimentDEU'].mean()
     overall_avg_eng = filtered_df['sentimentENG'].mean()
 
     source_avg['diffDEU'] = source_avg['sentimentDEU'] - overall_avg_deu
     source_avg['diffENG'] = source_avg['sentimentENG'] - overall_avg_eng
 
-    # Plot erstellen
     bar_width = 0.35
     index = np.arange(len(source_avg))
 
@@ -104,12 +88,10 @@ def durchschnittSentimentProQuellenDurchschnittSentimentAlleKommentare(df, keywo
     plt.xticks(index, source_avg.index)
     plt.legend()
 
-    # Anzahl der Kommentare pro Quelle über den Balken anzeigen (nur einmal pro Quelle)
     for i, (deu_count, eng_count) in enumerate(zip(source_avg['AnzahlKommentareDEU'], source_avg['AnzahlKommentareENG'])):
         plt.text(i, max(source_avg['diffDEU'].max(), source_avg['diffENG'].max()) + 0.05, str(deu_count),
                  color='black', fontweight='bold', ha='center', va='top')
 
-    # Schlüsselwörter im Diagramm oben links anzeigen
     plt.text(-0.5, max(source_avg['diffDEU'].max(), source_avg['diffENG'].max()), f"Schlüsselwörter:\n{', '.join(keywords)}",
              verticalalignment='top', horizontalalignment='left', bbox=dict(facecolor='white', alpha=0.5))
     plt.tight_layout()
